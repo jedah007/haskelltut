@@ -41,3 +41,15 @@ import qualified Data.ByteString as S
 -- takes a list of strict bytestrings and converts it to a lazy bytestring.
 -- toChunks
 -- takes a lazy bytestring and converts it to a list of strict ones.
+
+
+-- The bytestring version of ':' is called 'cons'
+
+-- ...
+
+
+-- Whenever you need better performance in a program that reads a lot of data into strings,
+-- give bytestrings a try, chances are you'll get some good performance boosts
+-- with very little effort on your part.
+-- I usually write programs by using normal strings and then convert them
+-- to use bytestrings if the performance is not satisfactory.
