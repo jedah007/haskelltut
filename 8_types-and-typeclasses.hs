@@ -280,3 +280,37 @@ instance Functor Tree where
 
 
 -- Kinds and some type-foo
+
+-- Types are little labels that values carry so that we can reason about the values.
+-- But types have their own little labels, called kinds.
+-- A kind is more or less the type of a type.
+
+-- Examine the kind of a type by using the :k command in GHCI
+-- :k Int
+-- -> Int :: *
+-- A * means that the type is a concrete type. A concrete type is a type that
+-- doesn't take any type parameters and values can only have types that
+-- are concrete types.
+
+-- :k Maybe
+-- -> Maybe :: * -> *
+
+-- :k Maybe Int
+-- -> Maybe Int :: *
+
+class Tofu t where
+    tofu :: j a -> t a j
+-- We assume * for a and so we can infer that j has to have a kind of * -> *.
+-- We see that t has to produce a concrete value too and that it takes two types.
+-- And knowing that a has a kind of * and j has a kind of * -> *,
+-- we infer that t has to have a kind of * -> (* -> *) -> *.
+
+data Frank a b  = Frank {frankField :: b a} deriving (Show)
+
+instance Tofu Frank where
+    tofu x = Frank x
+
+data Barry t k p = Barry { yabba :: p, dabba :: t k }
+-- has a kind of (* -> *) -> * -> * -> *
+instance Functor (Barry a b) where
+    fmap f (Barry {yabba = x, dabba = y}) = Barry {yabba = f x, dabba = y}
