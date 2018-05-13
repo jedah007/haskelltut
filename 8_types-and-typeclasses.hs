@@ -129,7 +129,7 @@ type IntMap v = Map Int v
 
 data LockerState = Taken | Free deriving (Show, Eq)
 type Code = String
-type LockerMap = Map.Map Int (LockerState, Code
+type LockerMap = Map.Map Int (LockerState, Code)
 
 lockerLookup :: Int -> LockerMap -> Either String Code
 lockerLookup lockerNumber map =
