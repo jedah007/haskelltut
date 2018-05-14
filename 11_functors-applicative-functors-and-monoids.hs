@@ -138,3 +138,63 @@ sequenceA' = foldr (liftA2 (:)) (pure [])
 -- 3) pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
 -- 4) pure f <*> pure x = pure (f x)
 -- 5) u <*> pure y = pure ($ y) <*> u
+
+
+-- On newtype laziness
+
+--  The type keyword is for making type synonyms. What that means is that we
+-- just give another name to an already existing type so that the type is
+-- easier to refer to. Say we did the following:
+--    type IntList = [Int]
+
+-- The newtype keyword is for taking existing types and wrapping them
+-- in new types, mostly so that it's easier to make them instances of certain
+-- type classes. When we use newtype to wrap an existing type, the type that
+-- we get is separate from the original type.
+--    newtype CharList = CharList { getCharList :: [Char] }
+
+-- The data keyword is for making your own data types and with them,
+-- you can go hog wild. They can have as many constructors and fields as you
+-- wish and can be used to implement any algebraic data type by yourself.
+
+-- If you just want your type signatures to look cleaner and be more descriptive,
+-- you probably want type synonyms. If you want to take an existing type
+-- and wrap it in a new type in order to make it an instance of a type class,
+-- chances are you're looking for a newtype. And if you want to make something
+-- completely new, odds are good that you're looking for the data keyword.
+
+
+-- Monoids
+
+-- class Monoid m where
+--    mempty :: m
+--    mappend :: m -> m -> m
+--    mconcat :: [m] -> m
+--    mconcat = foldr mappend mempty
+-- mempty represents the identity value for a particular monoid.
+-- mappend, which, as you've probably guessed, is the binary function.
+-- mconcat takes a list of monoid values and reduces them to a single value
+-- by doing mappend between the list's elements.
+
+-- Monoid laws
+-- 1) mempty `mappend` x = x
+-- 2) x `mappend` mempty = x
+-- 3) (x `mappend` y) `mappend` z = x `mappend` (y `mappend` z)
+
+-- Lists are monoids
+-- instance Monoid [a] where
+--    mempty = []
+--    mappend = (++)
+-- Notice that we wrote instance Monoid [a] and not instance Monoid [],
+-- because Monoid requires a concrete type for an instance.
+
+-- Product and Sum
+-- newtype Product a =  Product { getProduct :: a }
+--    deriving (Eq, Ord, Read, Show, Bounded)
+--
+-- instance Num a => Monoid (Product a) where
+--    mempty = Product 1
+--    Product x `mappend` Product y = Product (x * y)
+
+-- Any and All
+--
