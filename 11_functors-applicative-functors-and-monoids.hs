@@ -1,3 +1,5 @@
+import Data.Monoid
+
 -- Functors redux
 
 -- class Functor f where
@@ -197,4 +199,80 @@ sequenceA' = foldr (liftA2 (:)) (pure [])
 --    Product x `mappend` Product y = Product (x * y)
 
 -- Any and All
+
+-- newtype Any = Any { getAny :: Bool }
+--    deriving (Eq, Ord, Read, Show, Bounded)
 --
+-- instance Monoid Any where
+--        mempty = Any False
+--        Any x `mappend` Any y = Any (x || y)
+
+-- newtype All = All { getAll :: Bool }
+--        deriving (Eq, Ord, Read, Show, Bounded)
+--
+-- instance Monoid All where
+--        mempty = All True
+--        All x `mappend` All y = All (x && y)
+
+-- The Ordering monoid
+
+-- instance Monoid Ordering where
+--    mempty = EQ
+--    LT `mappend` _ = LT
+--    EQ `mappend` y = y
+--    GT `mappend` _ = GT
+--
+-- For instance, if we were to alphabetically compare the words "ox" and "on",
+-- we'd first compare the first two letters of each word, see that they are equal
+-- and then move on to comparing the second letter of each word.
+-- We see that 'x' is alphabetically greater than 'n', and so we know how the
+-- words compare. To gain some intuition for EQ being the identity, we can
+-- notice that if we were to cram the same letter in the same position in
+-- both words, it wouldn't change their alphabetical ordering.
+-- "oix" is still alphabetically greater than and "oin".
+
+lengthCompare :: String -> String -> Ordering
+lengthCompare x y = let a = length x `compare` length y
+                        b = x `compare` y
+                    in  if a == EQ then b else a
+
+lengthCompare' :: String -> String -> Ordering
+lengthCompare' x y = (length x `compare` length y) `mappend`
+                    (x `compare` y)
+
+lengthCompare'' :: String -> String -> Ordering
+lengthCompare'' x y = (length x `compare` length y) `mappend`
+                    (vowels x `compare` vowels y) `mappend`
+                    (x `compare` y)
+    where vowels = length . filter (`elem` "aeiou")
+
+-- Maybe the monoid
+
+-- instance Monoid a => Monoid (Maybe a) where
+--    mempty = Nothing
+--    Nothing `mappend` m = m
+--    m `mappend` Nothing = m
+--    Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
+
+-- Using monoids to fold data structures
+
+-- Because there are so many data structures that work nicely with folds,
+-- the Foldable type class was introduced. Much like Functor is for things
+-- that can be mapped over, Foldable is for things that can be folded up!
+
+-- So whereas foldr takes a list and folds it up, the foldr from Data.Foldable
+-- accepts any type that can be folded up, not just lists!
+
+data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
+
+-- One way to make a type constructor an instance of Foldable is to just
+-- directly implement foldr for it. But another, often much easier way,
+-- is to implement the foldMap function, which is also a part of the
+-- Foldable type class.
+-- foldMap :: (Monoid m, Foldable t) => (a -> m) -> t a -> m
+
+instance F.Foldable Tree where
+    foldMap f Empty = mempty
+    foldMap f (Node x l r) = F.foldMap f l `mappend`
+                             f x           `mappend`
+                             F.foldMap f r
